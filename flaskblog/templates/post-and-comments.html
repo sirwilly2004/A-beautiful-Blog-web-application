@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Future of Artificial Intelligence: Trends and Predictions - Trend Blogger</title>
+    <link rel="stylesheet" href="{{url_for('static', filename='css/post.css')}}">
+    <script src="https://cdn.jsdelivr.net/npm/sceditor@3/minified/sceditor.min.js"></script>
+</head>
+<body>
+    <header class="header">
+        <a href="/" class="logo">
+            <span>Code</span>
+            <span>myhobby</span>
+        </a>
+        <div>
+            {% if current_user.is_authenticated %}
+                <a href="{{ url_for('logout') }}" class="logout-btn">LOGOUT</a>
+            {% endif %}
+            <a href="{{ url_for('home_page') }}" class="logout-btn">BACK</a>
+        </div>
+    </header>
+
+    <main class="container">
+        <article class="post">
+            <header class="post-header">
+                <h1 class="post-title">{{post.title }}</h1>
+                <div class="post-meta">
+                    <span class="category">{{post.category.name}}</span>
+                    <time datetime="{{ post.date_posted.isoformat() }}">{{ post.date_posted.strftime('%d %b %Y') }}</time>
+                </div>
+            </header>
+            <img src="{{url_for('static', filename='./images/img1.jpg')}}" alt="AI concept image" class="post-image">
+            <div class="post-content">
+                <p class="post-description"> {{ post.description}}</p>
+                <div class="post-body">
+                    {{ post.content|safe }}
+                </div>
+                <div class="profile">
+                    <img src="{{ url_for('static', filename='users/profile-pics/' + post.author.image_file) }}" 
+                    alt="Author's profile picture" class="profile-img">
+                     <span class="profile-name">{{ post.author.username }}</span>
+                </div>
+                <div class="post-actions">
+                {% if current_user == post.author %}
+                    <div class="action-buttons">
+                        <form action="{{ url_for('edit_post', post_id=post.id) }}" method="POST">
+                            <button class="btn btn-primary" type="submit">Edit Post</button>
+                        </form>
+                        <form action="{{ url_for('delete_post', post_id=post.id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this post?');">
+                            <button class="btn btn-danger" type="submit">Delete Post</button>
+                        </form>
+                    </div>
+                {% endif %}
+                
+                    <div class="share-link">
+                        <input type="text" class="share-input" value="{{url_for('post_detail', post_id=post.id)}}" readonly>
+                        <button class="copy-btn" onclick="copyShareLink()">Copy Link</button>
+                    </div>
+                </div>
+            </div>
+        </article>
+
+        <section class="comments-section">
+            <h2 class="comments-title">Comments</h2>
+            <div class="comments-list">
+                {% for comment in comments %}
+                    <div class="comment">
+                        <div class="comment-header">
+                            <div class="comment-author">
+                                <img src="{{ url_for('static', filename='users/profile-pics/' ~ comment.user.image_file if comment.user.image_file else 'placeholder.svg?height=40&width=40&text=' ~ comment.user.username[0]) }}" alt="Author's profile picture">
+                                <span class="comment-author-name">{{ comment.user.username }}</span>
+                            </div>
+                            <time class="comment-date" datetime="{{ comment.date_posted.isoformat() }}">{{ comment.date_posted.strftime('%d %b %Y') }}</time>
+                        </div>
+                        <p class="comment-body">{{ comment.content|safe }}</p>
+                    </div>
+                {% else %}
+                    <p>No comments yet. Be the first to comment!</p>
+                {% endfor %}
+            </div>
+            
+            <div class="comment-form">
+                <h3 class="comment-form-title">Leave a Comment</h3>
+                <form action="#" method="post">
+                    <div class="form-group">
+                        <label for="comment">Comment:</label>
+                        <textarea id="comment" name="comment" class="form-control" required></textarea>
+                    </div>
+                    <button type="submit" class="submit-btn">Post Comment</button>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/sceditor@3/minified/formats/xhtml.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sceditor@3/minified/sceditor.min.js"></script>
+    <script>
+// Replace the textarea #example with SCEditor
+    var textarea = document.getElementById('content');
+        sceditor.create(textarea, {
+        format: 'xhtml',
+        style: 'https://cdn.jsdelivr.net/npm/sceditor@3/minified/themes/content/default.min.css'
+            });
+
+    </script>
+    <script>
+
+    function copyShareLink() {
+        var copyText = document.querySelector(".share-input");
+        copyText.select();
+        document.execCommand("copy");
+        alert("Link copied to clipboard!");
+    }
+         function editPost() {
+        const postId = '{{ post.id }}'; // Assuming you have access to post.id
+        window.location.href = `/edit-post/${postId}`;
+    }
+
+    function deletePost() {
+        const postId = '{{ post.id }}'; // Assuming you have access to post.id
+        const confirmation = confirm("Are you sure you want to delete this post?");
+        if (confirmation) {
+            fetch(`/delete-post/${postId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert("Post deleted successfully.");
+                    window.location.reload(); // Reload the page or redirect as needed
+                } else {
+                    alert("Failed to delete the post. Please try again.");
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("An error occurred. Please try again.");
+            });
+        }
+    }
+
+    
+    </script>
+</body>
+</html>

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{url_for('static', filename='css/about.css')}}">
+    {% if title %}
+        <title>Trend Blogger | {{title}}</title>
+    {% else %}
+        <title>Trend Blogger </title>
+    {% endif %}
+</head>
+<body>
+    <header class="header">
+        <a href="/" class="logo">
+            <span>Code</span>
+            <span>myhobby</span>
+        </a>
+        <div>
+            {% if current_user.is_authenticated %}
+                <a href="{{ url_for('logout') }}" class="logout-btn">LOGOUT</a>
+            {% endif %}
+            <a href="{{ url_for('home_page') }}" class="logout-btn">BACK</a>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="about-section">
+            <img src="https://images.unsplash.com/photo-1499750310107-5fef28a66643" 
+                 alt="Blog Hero Image" 
+                 class="hero-image">
+            
+            <div class="about-content">
+                <h1 class="about-title">About Codemyhobby</h1>
+                <p class="about-description">
+                    Welcome to Codemyhobby, your premier destination for insightful articles on technology, programming, and food. Founded in 2024, we've made it our mission to provide high-quality, engaging content that helps our readers stay informed and inspired. Our team of passionate writers and experts work tirelessly to bring you the latest trends, tips, and insights in these exciting fields.
+                </p>
+                <p class="about-description">
+                    Whether you're a seasoned developer looking to stay current with the latest programming trends, a tech enthusiast eager to explore new innovations, or a food lover seeking new recipes and culinary adventures, Codemyhobby has something for everyone. We believe in creating a community where knowledge sharing and learning go hand in hand.
+                </p>
+
+                <div class="stats-container">
+                    <div class="stat-item">
+                        <div class="stat-number">1000+</div>
+                        <div class="stat-label">Articles Published</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">50K+</div>
+                        <div class="stat-label">Monthly Readers</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">{{category | length }}</div>
+                        <div class="stat-label">Categories</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% block footer%}
+    {% include 'footer.html'%}
+{% endblock %}
+        
+</body>
+</html>

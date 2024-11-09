@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    {% if title %}
+        <title>Trend Blogger | {{title}}</title>
+    {% else %}
+        <title>Trend Blogger </title>
+    {% endif %}
+
+    <!-- Box-icon -->
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="{{url_for('static', filename='css/style.css')}}">
+    {% block style%}
+    {% endblock%}
+</head>
+<body>
+  <nav>
+    <header>
+        <div class="nav container">
+            <a href="{{ url_for('home_page') }}" class="logo">Code <span>myhobby</span></a>
+            
+            <!-- Menu button for smaller screens -->
+            <button id="menu-btn" class="menu-btn">☰ Menu</button>
+            
+            <!-- Navigation links wrapped in a container -->
+            <div class="nav-links">
+                {% if not current_user.is_authenticated %}
+                    <a href="{{ url_for('register') }}" class="login">Register</a>
+                    <a href="{{ url_for('login') }}" class="login">Login</a>
+                {% else %}
+                    <a href="{{ url_for('about') }}" class="login">About</a>
+                    <a href="{{url_for('user_profile')}}" class="login">Profile</a>
+                    <a href="{{url_for('create_post')}}" class="login"> Create Post</a>
+                    <a href="{{ url_for('logout') }}" class="login">Logout</a>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+</nav>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+  <div id="flash-messages">
+    {% for category, message in messages %}
+      <div class="alert alert-{{ category }}">
+        {{ message }}
+      </div>
+    {% endfor %}
+  </div>
+  <script>
+    // Set a timeout to hide the flash messages after 1 minute (60000 ms)
+    setTimeout(function() {
+      var flashMessages = document.getElementById("flash-messages");
+      if (flashMessages) {
+        flashMessages.style.display = "none";
+      }
+    }, 10000); // 60000 ms = 1 minute and half a minute will be 30,000
+  </script>
+{% endif %}
+{% endwith %}
+
+
+{% block content %}{% endblock %}
+{% block footer %}{% endblock %}
+  <!-- JavaScript code to toggle navbar links -->
+  {% block scripts %} {% endblock %}
+</body>
+</html>

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile - {{title}}</title>
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="{{url_for('static', filename='css/user_profile.css')}}">
+</head>
+<body>
+    <header class="header">
+        <a href="/" class="logo">
+            <span>Code</span>
+            <span>myhobby</span>
+        </a>
+        <div>
+            {% if current_user.is_authenticated %}
+            <a href="{{ url_for('logout') }}" class="logout-btn">LOGOUT</a>
+            {% endif %}
+            <a href="{{ url_for('home_page') }}" class="logout-btn">BACK</a>
+        </div>
+    </header>
+
+    <div class="container">
+        <main class="profile">
+            <header class="profile-header">
+                <img src="{{ url_for('static', filename='users/profile-pics/' + current_user.image_file) }}" alt="User Avatar" class="profile-avatar" id="user-avatar">
+                <h1 class="profile-name">{{ user.username }}</h1>
+                <p class="profile-tagline">{{ user.short_bio or "No bio available" }}</p>
+                <button class="update-profile-btn" onclick="toggleEditMode()">Update Profile</button>
+            </header>
+            <div class="profile-content">
+                <div id="view-profile">
+                    <section class="profile-section">
+                        <h2>ABOUT ME</h2>
+                        <p class="profile-bio">{{ user.long_bio or "User hasn't shared a bio yet." }}</p>
+                    </section>
+                    <section class="profile-section">
+                        <h2>PERSONAL INFORMATION</h2>
+                        <div class="profile-info">
+                            <div class="info-item">
+                                <div class="info-label">Username</div>
+                                <div class="info-value" id="username-value">{{ user.username }}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Email</div>
+                                <div class="info-value" id="email-value">{{user.email}}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Location</div>
+                                <div class="info-value" id="location-value">{{ user.location }}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Website</div>
+                                <div class="info-value" id="website-value"><a href="{{ user.website }}">{{ user.website }}</a></div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Joined</div>
+                                <div class="info-value">{{ user.joined_date.strftime('%B %Y') }}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Posts</div>
+                                <div class="info-value" id="posts-value">{{user.posts | length }}</div>
+                            </div>
+                        </div>
+                    </section>
+                    <section class="profile-section intest">
+                        <h2>INTERESTS</h2>
+                        <ul>
+                            <li>Web Development</li>
+                            <li>Artificial Intelligence</li>
+                            <li>Internet of Things</li>
+                            <li>Cybersecurity</li>
+                        </ul>
+                    </section>
+                </div>
+                <div id="edit-profile" class="edit-form" style="display: none;">
+                    <h2>Edit Profile</h2>
+                    <form id="update-profile-form" enctype="multipart/form-data">
+                        <div class="form-group">
+                            <label for="username">Username</label>
+                            <input type="text" id="username" name="username" class="form-control" value="{{ user.username }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" name="email" class="form-control" value="{{ user.email }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="location">Location</label>
+                            <input type="text" id="location" name="location" class="form-control" value="{{ user.location }}">
+                        </div>
+                        <div class="form-group">
+                            <label for="website">Website</label>
+                            <input type="url" id="website" name="website" class="form-control" value="{{ user.website }}">
+                        </div>
+                        <div class="form-group">
+                            <label for="short_bio">Short Bio</label>
+                            <input type="text" id="short_bio" name="short_bio" class="form-control" value="{{ user.short_bio }}">
+                        </div>
+                        <div class="form-group">
+                            <label for="long_bio">Long Bio</label>
+                            <textarea id="long_bio" name="long_bio" class="form-control">{{ user.long_bio }}</textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="avatar">Profile Picture</label>
+                            <input type="file" id="avatar" name="avatar" class="form-control" accept="image/*">
+                        </div>
+                        <div class="actions">
+                            <button type="button" class="update-profile-btn" onclick="toggleEditMode()">Cancel</button>
+                            <button type="submit" class="update-profile-btn">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    {% block footer %}
+        {% include 'footer.html' %}
+    {% endblock %}
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.1/jquery.min.js" integrity="sha512-aVKKRRi/Q/YV+4mjoKBsE4x3H+BkegoM/em46NNlCqNTmUYADjBbeNefNxYV7giUp0VxICtqdrbqU7iVaeZNXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="{{url_for('static', filename='main.js')}}"></script>
+    <script>
+        function toggleEditMode() {
+            const viewProfile = document.getElementById('view-profile');
+            const editProfile = document.getElementById('edit-profile');
+            
+            if (editProfile.style.display === 'none') {
+                editProfile.style.display = 'block';
+                viewProfile.style.display = 'none';
+            } else {
+                editProfile.style.display = 'none';
+                viewProfile.style.display = 'block';
+            }
+        }
+
+        document.getElementById('update-profile-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            const formData = new FormData(this);
+            
+            fetch('/update-profile', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Profile updated successfully!');
+                    location.reload();  // Reload the page to show updated information
+                } else {
+                    alert('Error updating profile: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while updating the profile.');
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,47 @@
+<footer>
+    <div class="footer-container">
+        <div class="sec aboutus">
+            <h2>About Me</h2>
+            <p>Welcome to my blog! I am passionate about sharing insights on technology, travel, and lifestyle. With a background in software development and a love for exploration, I aim to inspire others through my experiences. Join me as I navigate the fascinating world of innovation and adventure, uncovering stories that motivate and engage. Your support means the world to me!</p>
+            <ul class="sci">
+                <li><a href="https://web.facebook.com/profile.php?id=61562069513093" target="_blank"><i class="bx bxl-facebook"></i></a></li>
+                <li><a href="https://www.instagram.com/olaolu.williams.98/" target="_blank"><i class="bx bxl-instagram"></i></a></li>
+                <li><a href="https://x.com/OlaoluWilly2004" target="_blank"><i class="bx bxl-twitter"></i></a></li>
+                <li><a href="https://www.linkedin.com/in/olaolu-williams-65a80021b" target="_blank"><i class="bx bxl-linkedin"></i></a></li>
+            </ul>
+        </div>
+        <div class="sec quicklinks">
+            <h2>Quick Links</h2>
+            <ul>
+                <li><a href="{{url_for('home_page')}}">Home</a></li>
+                <li><a href="{{url_for('about')}}">About</a></li>
+            </ul>
+        </div>
+        <div class="sec contactBx">
+            <h2>Contact Info</h2>
+            <ul class="info">
+                <li>
+                    <span><i class='bx bxs-map'></i></span>
+                    <span>129, Apapa Road Lagos state <br> Ebutte Metta PA 112045 <br> Nigeria</span>
+                </li>
+                <li>
+                    <span><i class='bx bx-envelope' ></i></span>
+                    <p><a href="mailto:codemyhobby9@gmail.com">williamsolaolu28@gmail.com</a></p>
+                </li>
+            </ul>
+        </div>
+        <div class="sec newsletterBx">
+            <h2>Subscribe to our Newsletter</h2>
+            <form action="{{ url_for('subscribe') }}" method="POST" class="newsletter-form">
+                <input type="email" name="email" placeholder="Enter your email" required>
+                <button type="submit" class="subscribe-btn">Subscribe</button>
+            </form>
+        </div>
+        
+    </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.1/jquery.min.js" integrity="sha512-aVKKRRi/Q/YV+4mjoKBsE4x3H+BkegoM/em46NNlCqNTmUYADjBbeNefNxYV7giUp0VxICtqdrbqU7iVaeZNXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="{{url_for('static', filename='main.js')}}"></script>
+</body>
+</html>

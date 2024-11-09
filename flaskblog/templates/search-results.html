@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Results - Trend Blogger</title>
+    <link rel="stylesheet" href="{{url_for('static', filename='css/search_result.css')}}">
+</head>
+<body>
+    <header class="header">
+        <a href="/" class="logo">
+            <span>Code</span>
+            <span>myhobby</span>
+        </a>
+        <div>
+            {% if current_user.is_authenticated %}
+                <a href="{{ url_for('logout') }}" class="logout-btn">LOGOUT</a>
+            {% endif %}
+                <a href="{{ url_for('home_page') }}" class="logout-btn">BACK</a>
+            
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- search form  -->
+        <form class="search-form" action="/search" method="GET">
+            <input type="search" name="search" class="search-input" placeholder="Search blog posts..." value="{{query}}" aria-label="Search blog posts">
+        </form>
+
+        <div class="search-results">
+            <h2>Search Results for "{{ query }}"
+                {% if results %}
+                    {% for post in results %}
+                        <article class="search-result-item">
+                            <a href="{{ url_for('post_detail', post_id=post.id) }}" class="search-result-title">{{ post.title }}</a>
+                            <div class="search-result-meta">
+                                <span class="search-result-category">{{ post.category.name }}</span>
+                                <time datetime="{{ post.date_posted.isoformat() }}">{{ post.date_posted.strftime('%d %b %Y') }}</time>
+                            </div>
+                            <p class="search-result-description">{{ post.description }}</p>
+                        </article>
+                    {% endfor %}
+                {% else %}
+                <p>No results found for "{{ query }}".</p>
+                {% endif %}
+        </div>
+    </main>
+</body>
+</html>

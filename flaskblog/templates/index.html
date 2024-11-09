@@ -1,0 +1,82 @@
+{% extends "header.html" %}
+{% block content %}
+    <!-- break it here for the header.html  -->
+        <section class="home" id="home">
+            <div class="home-text container">
+                <h2 class="home-title">Welcome To Trend Blogger</h2>
+                <span class="home-subtitle">Your source of great content and articles from experts</span>
+            </div>
+            <div class="search-container">
+                <form action="{{ url_for('search') }}" method="GET">
+                    <input type="text" name="search" placeholder="Search posts..." required>
+                    <button type="submit">Search</button>
+                </form>
+            </div>
+        </section>
+
+        <section class="about container" id="about">
+            <div class="contentBx">
+                <h2 class="titleText">Catch up with the trending topics</h2>
+                <p class="title-text">
+                    Stay updated with the latest trends and popular discussions that are shaping the world today. Explore a wide range of topics, from technology advancements and social issues to entertainment buzz and lifestyle updates. Get insights and perspectives from various voices around the globe.
+                    <br>Whether you're interested in breaking news, in-depth analyses, or curious facts, we've got you covered with fresh, engaging content. Dive into the most talked-about topics and be a part of the conversation, right here, right now.
+                </p>
+
+                <a href="{{url_for('about')}}" class="btn2">Read more</a>
+            </div>
+            <div class="imgBx">
+                <img src="{{url_for('static', filename='images/about.png')}}" alt="" class="fitBg">
+            </div>
+        </section>
+
+        <div class="post-filter container">
+            <span class="filter-item active-filter" data-filter="all">All</span>
+            {% for category in categories %}
+                <span class="filter-item" data-filter="{{ category.name | lower }}">{{ category.name }}</span>
+            {% endfor %}
+        </div>
+        
+        
+        <div class="post container">
+            <!-- This loop through the database and create a sample of this block code with the necessary information Post 1,2 .. etc -->
+            {% for post in posts %}
+                <div class="post-box {{post.category.name | lower}}">
+                    <!-- this is the post image  -->
+                    <img src="{{url_for('static', filename='images/img1.jpg')}}" alt="" class="post-img">
+                    <!-- category name for the post -->
+                    <h2 class="category">{{post.category.name}}</h2>
+                    <!-- post title with link -->
+                    <a href="{{url_for('post_detail', post_id= post.id)}}" class="post-title">{{post.title}}</a>
+                    <span class="post-date">{{ post.date_posted.strftime('%d %b %Y') }}</span>
+                    <p class="post-description"> {{ post.description }}</p>
+                    <div class="profile">
+                        <img src="{{url_for('static' ,filename='images/testi1.jpg')}}" alt="" class="profile-img">
+                        <span class="profile-name">{{post.author.username }}</span>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        <!-- Pagination -->
+        <div class="pagination">
+            <a href="{{ url_for('home_page', page=1) }}" class="page-link">First</a>
+            <a href="{{ url_for('home_page', page=previous_page) }}" class="page-link">&laquo;</a>
+            {% for page_num in range(1, total_pages + 1) %}
+                <a href="{{ url_for('home_page', page=page_num) }}" class="page-link {% if page_num == current_page %}active{% endif %}">{{ page_num }}</a>
+            {% endfor %}
+            <a href="{{ url_for('home_page', page=next_page) }}" class="page-link">&raquo;</a>
+            <a href="{{ url_for('home_page', page=total_pages) }}" class="page-link">Last</a>
+        </div>
+        
+    <!-- remove the footer.html and i am going to extend the footer.html -->
+{% endblock content %}
+
+{% block footer %}
+    {% include "footer.html" %} 
+{% endblock footer %}
+{% block scripts %}
+    <script>
+        document.getElementById('menu-btn').addEventListener('click', function() {
+            document.querySelector('.nav-links').classList.toggle('active');
+        });
+    </script>
+{% endblock %}
