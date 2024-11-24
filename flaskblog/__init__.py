@@ -24,7 +24,7 @@ MAIL_USERNAME = app.config['MAIL_USERNAME'] = 'williamsolaolu5@gmail.com'  # Use
 MAIL_PASSWORD = app.config['MAIL_PASSWORD'] = 'krqb rvcz diti hsam'     # Use your generated App Password
 MAIL_USE_TLS = app.config['MAIL_USE_TLS'] = True
 MAIL_USE_SSL = app.config['MAIL_USE_SSL'] = False
-
+MAIL_DEFAULT_SENDER = app.config['MAIL_DEFAULT_SENDER'] = ('Code myhobby', 'williamsolaolu5@gmail.com')
 
 mail = Mail(app)
 # ''(use later second password)

@@ -1,65 +1,10 @@
 from flask import render_template, redirect, url_for, request,flash,abort,jsonify
-from flaskblog import app,db,mail
+from flaskblog import app,db
 from flask_login import login_user, login_required, logout_user,current_user
 from flaskblog import bcrypt
 from flaskblog.models import Post, User,Category,Subscriber,Comment
 from datetime import datetime
-from werkzeug.utils import secure_filename
-import os
-import secrets
-from PIL import Image
-from flaskblog.form import ResetPasswordForm,RequestResetForm
-from flask_mail import Message
-
-
-@app.route('/add-posts')
-def add_posts():
-    user = User.query.first()
-
-    # Define categories that should already be in the database
-    category_names = ["Tech", "Food", "News"]
-    categories = {category.name: category for category in Category.query.all()}
-
-    # Sample data
-    sample_posts = [
-        {"title": "Exploring AI in 2024", "description": "An in-depth look at the latest in artificial intelligence.", "content": "Content on AI advancements.", "category": "Tech"},
-        {"title": "Top 10 Healthy Recipes", "description": "Delicious and nutritious recipes to try this year.", "content": "Content on healthy recipes.", "category": "Food"},
-        {"title": "Climate Change Updates", "description": "The latest news on climate change and its effects globally.", "content": "Content on climate change.", "category": "News"},
-        {"title": "New iPhone Features", "description": "Apple's latest phone features.", "content": "Details on iPhone updates.", "category": "Tech"},
-        {"title": "The Future of Renewable Energy", "description": "How renewable energy is shaping our world.", "content": "Insights on renewable energy.", "category": "Tech"},
-        {"title": "Vegan Desserts to Try", "description": "Easy and tasty vegan dessert recipes.", "content": "Vegan dessert ideas.", "category": "Food"},
-        {"title": "Election Results and Analysis", "description": "Breaking down the latest election results.", "content": "Analysis on election outcomes.", "category": "News"},
-        {"title": "How to Make Sushi at Home", "description": "A beginner's guide to making sushi.", "content": "Step-by-step sushi-making guide.", "category": "Food"},
-        {"title": "Advancements in Robotics", "description": "How robots are becoming part of everyday life.", "content": "Robotics in daily life.", "category": "Tech"}
-    ]
-
-    # Create and save posts
-    for post_data in sample_posts:
-        post = Post(
-            title=post_data["title"],
-            description=post_data["description"],
-            content=post_data["content"],
-            date_posted=datetime.utcnow(),
-            user_id=user.id,
-            category_id=categories[post_data["category"]].id
-        )
-        db.session.add(post)
-
-    # Commit all new posts to the database
-    db.session.commit()
-    print("Sample posts created successfully!")
-    return {'message': 'posts data added successfully'}
-
-
-@app.route('/add')
-def add_category():
-    categories = ['Tech', 'Food', 'News', 'Finance']
-
-    for category_name in categories:
-        category = Category(name=category_name)
-        db.session.add(category)
-    db.session.commit()
-    return 'Added Category Successful'
+from .utils import notify_users_about_post,save_picture,send_reset_email,allowed_file
 
 
 # if individual post is been clicked 
@@ -78,7 +23,7 @@ def post_detail(post_id):
             flash('You need to be logged in to comment.', 'warning')
             return redirect(url_for('login'))
     comments = Comment.query.filter_by(post_id=post.id).order_by(Comment.date_posted.desc()).all()
-    print(post.content)
+    # print(post.content)
     return render_template('post-and-comments.html', post=post, comments=comments)
 @app.route('/search', methods=['GET'])
 def search():
@@ -98,7 +43,7 @@ def home_page():
     categories = Category.query.all()  # Retrieve all categories
     # Query Parameters
     page = request.args.get('page', 1, type=int)  
-    per_page = 5 
+    per_page = 6
     total_posts = Post.query.count()  # Get the total number of posts in the model
     total_pages = (total_posts + per_page - 1) // per_page  # Calculate total pages in the model
 
@@ -115,72 +60,36 @@ def home_page():
                            next_page=next_page, 
                            categories=categories)
 
-
-
 @app.route('/about')
 def about():
     category = Category.query.all()
     return render_template('about.html', title='About', category=category)
 
 
-@app.route('/insert-data')
-def sample_data():
-    user = User.query.first()
-
-    # Define categories that should already be in the database
-    category_names = ["Tech", "Food", "News"]
-    categories = {category.name: category for category in Category.query.all()}
-
-    # Sample data
-    sample_posts = [
-        {"title": "Exploring AI in 2024", "description": "An in-depth look at the latest in artificial intelligence.", "content": "Content on AI advancements.", "category": "Tech"},
-        {"title": "Top 10 Healthy Recipes", "description": "Delicious and nutritious recipes to try this year.", "content": "Content on healthy recipes.", "category": "Food"},
-        {"title": "Climate Change Updates", "description": "The latest news on climate change and its effects globally.", "content": "Content on climate change.", "category": "News"},
-        {"title": "New iPhone Features", "description": "Apple's latest phone features.", "content": "Details on iPhone updates.", "category": "Tech"},
-        {"title": "The Future of Renewable Energy", "description": "How renewable energy is shaping our world.", "content": "Insights on renewable energy.", "category": "Tech"},
-        {"title": "Vegan Desserts to Try", "description": "Easy and tasty vegan dessert recipes.", "content": "Vegan dessert ideas.", "category": "Food"},
-        {"title": "Election Results and Analysis", "description": "Breaking down the latest election results.", "content": "Analysis on election outcomes.", "category": "News"},
-        {"title": "How to Make Sushi at Home", "description": "A beginner's guide to making sushi.", "content": "Step-by-step sushi-making guide.", "category": "Food"},
-        {"title": "Advancements in Robotics", "description": "How robots are becoming part of everyday life.", "content": "Robotics in daily life.", "category": "Tech"}
-    ]
-
-    # Create and save posts
-    for post_data in sample_posts:
-        post = Post(
-            title=post_data["title"],
-            description=post_data["description"],
-            content=post_data["content"],
-            date_posted=datetime.utcnow(),
-            user_id=user.id,
-            category_id=categories[post_data["category"]].id
-        )
-        db.session.add(post)
-
-    # Commit all new posts to the database
-    db.session.commit()
-    return "Sample posts created successfully!"
-
 
 
 @app.route('/login', methods=['POST', 'GET'])
 def login():
     if current_user.is_authenticated:
-        return redirect(url_for('home_page'))
-    
+        return redirect(url_for('home_page'))  # Redirect if already logged in
+
     if request.method == 'POST':
         user = User.query.filter_by(email=request.form['email']).first()
         if not user:
-            flash('This email does not exit', 'danger')
+            flash('This email does not exist', 'danger')
             return redirect(url_for('login'))
         if not bcrypt.check_password_hash(user.password, request.form['password']):
             flash('Incorrect password, try again', 'danger')
             return redirect(url_for('login'))
-        remember = 'remember' in request.form  
+        
+        remember = 'remember' in request.form  # Check if 'remember me' is selected
         login_user(user, remember=remember)
-        flash('You have been logged in successfully!', 'success')
-        return redirect(url_for('home_page'))
-    
-    return render_template('login.html', title='login')
+        flash(f'{current_user.username} you have been logged in enjoy your stay on the site ')
+        # Handle the redirection to the original page after login
+        next_page = request.args.get('next')  # Retrieve the 'next' parameter
+        return redirect(next_page) if next_page else redirect(url_for('home_page'))
+    return render_template('login.html', title='Login')
+
 
 @app.route('/register', methods=['POST', 'GET'])
 def register():
@@ -210,32 +119,42 @@ def register():
 @app.route('/create-post', methods=['GET', 'POST'])
 @login_required
 def create_post():
+    next_page = request.args.get('next')  # Check for 'next' in the query string
+
     categories = Category.query.all()
-    if current_user.is_authenticated:
-        if request.method == 'POST':
-            title = request.form['title']
-            category_id = request.form['category_id']
-            description = request.form['description']
-            content = request.form['content'] 
-            # create a new instance of the post class
-            new_post = Post( title=title, description=description,  
-                            content=content,
-                            user_id=current_user.id,
-                            date_posted=datetime.utcnow(),
-                            category_id= category_id)
-            try:
-                db.session.add(new_post)
-                db.session.commit()
-                flash('Post created successfully!', 'success')
-                return redirect(url_for('home_page'))  # Redirect to a view after success
-            except Exception as e:
-                db.session.rollback()  # Rollback in case of error
-                flash('Error creating post: {}'.format(str(e)), 'danger')
-            # fetch all the product category database
+    if request.method == 'POST':
+        title = request.form['title']
+        category_id = request.form['category_id']
+        description = request.form['description']
+        content = request.form['content'] 
+        image_url = request.form.get('image_url')
+        if image_url:
+        # Validate the image URL here if necessary
+            if not image_url.startswith("http"):
+                flash('Invalid image URL format', 'danger')
+                return redirect(url_for('create_post'))
+
+        # create a new instance of the post class
+        new_post = Post( title=title, description=description,  
+                        content=content,
+                        user_id=current_user.id,
+                        image_url=image_url,
+                        date_posted=datetime.utcnow(),
+                        category_id= category_id)
+        try:
+            db.session.add(new_post)
+            db.session.commit()
+            flash('Post created successfully!', 'success')
+
+            # Notify all the subscribers or users about the new post and send it to there gmail
+            notify_users_about_post(new_post)
+            print('sent the message to the user of the post')
+            return redirect(next_page or url_for('home_page')) # Redirect to a view after success
+        except Exception as e:
+            db.session.rollback()  # Rollback in case of error
+            flash('Error creating post: {}'.format(str(e)), 'danger')
+        # fetch all the product category database
     return render_template('create-post.html', title='create post', categories=categories)
-
-
-
 @app.route('/logout')
 @login_required
 def logout():
@@ -283,13 +202,15 @@ def edit_post(post_id):
     # check if the request is equal to post 
     if request.method == 'POST':
         # Print to verify if form data is being sent
-        print(request.form)
+        # print(request.form)
 
         # Get form data with a fallback to an empty string
         title = request.form.get('title', '').strip()
         category_id = request.form.get('category_id', '').strip()
         description = request.form.get('description', '').strip()
         content = request.form.get('content', '').strip()
+        image_url = request.form.get('image_url', '').strip()
+
 
         # Check if all fields have data before committing them to the database 
         if title and category_id and description and content:
@@ -297,6 +218,7 @@ def edit_post(post_id):
             post.category_id = category_id
             post.description = description
             post.content = content
+            post.image_url = image_url
             db.session.commit()
             flash('Post updated successfully!', 'success')
             return redirect(url_for('home_page'))
@@ -307,22 +229,6 @@ def edit_post(post_id):
 
 
 # forgot password reset code is here 
-def send_reset_email(user):
-    token = user.get_reset_token()
-    msg = Message('Password Reset Request',
-                  recipients=[user.email], sender='Techblog.com')
-    msg.body = f'''To reset your password, visit the following link:
-{url_for('reset_password', token=token, _external=True)}
-
-If you did not make this request, simply ignore this email and no changes will be made.
-'''
-    try:
-        mail.send(msg)
-        return True
-    except Exception as e:
-        print(f"Error sending email: {str(e)}")
-        return False
-
 @app.route('/forgot-password', methods=['GET', 'POST'])
 def forgot_password():
     if current_user.is_authenticated:
@@ -362,22 +268,7 @@ def reset_password(token):
     return render_template('reset_password.html', token=token)
 
 # copied from vo
-def save_picture(form_picture):
-    random_hex = secrets.token_hex(8)
-    _, f_ext = os.path.splitext(form_picture.filename)
-    picture_filename = random_hex + f_ext
-    picture_path = os.path.join(app.root_path, 'static/users/profile-pics', picture_filename)
-    
-    # Resize the image
-    output_size = (125, 125)
-    img = Image.open(form_picture)
-    img.thumbnail(output_size)
-    img.save(picture_path)
-    
-    return picture_filename
 
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'jpg', 'jpeg', 'png', 'gif'}
 
 @app.route('/update-profile', methods=['POST'])
 @login_required
@@ -424,3 +315,8 @@ def update_profile():
 def user_profile():
     image_file = url_for('static', filename='users/profile-pics/' + current_user.image_file)
     return render_template('user_profile.html', title='Profile', user=current_user, image_file=image_file)
+
+
+# code for the redirecting user when they try to go to a page that required the user to be login and it get them back to the place they try to access
+#  next_page = request.args.get('next')
+# return redirect(next_page) if next_page else redirect(url_for('home_page'))

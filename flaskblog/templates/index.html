@@ -42,7 +42,7 @@
             {% for post in posts %}
                 <div class="post-box {{post.category.name | lower}}">
                     <!-- this is the post image  -->
-                    <img src="{{url_for('static', filename='images/img1.jpg')}}" alt="" class="post-img">
+                    <img src="{{ post.image_url if post.image_url else url_for('static', filename='images/img1.jpg') }}" 
                     <!-- category name for the post -->
                     <h2 class="category">{{post.category.name}}</h2>
                     <!-- post title with link -->
@@ -50,9 +50,11 @@
                     <span class="post-date">{{ post.date_posted.strftime('%d %b %Y') }}</span>
                     <p class="post-description"> {{ post.description }}</p>
                     <div class="profile">
-                        <img src="{{url_for('static' ,filename='images/testi1.jpg')}}" alt="" class="profile-img">
-                        <span class="profile-name">{{post.author.username }}</span>
+                        <img src="{{ url_for('static', filename='users/profile-pics/' + (post.author.image_file if post.author.image_file else 'default.jpg')) }}" 
+                             alt="Author's profile picture" class="profile-img">
+                        <span class="profile-name">{{ post.author.username }}</span>
                     </div>
+                    
                 </div>
             {% endfor %}
         </div>

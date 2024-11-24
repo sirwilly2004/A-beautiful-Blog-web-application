@@ -30,7 +30,8 @@
                     <time datetime="{{ post.date_posted.isoformat() }}">{{ post.date_posted.strftime('%d %b %Y') }}</time>
                 </div>
             </header>
-            <img src="{{url_for('static', filename='./images/img1.jpg')}}" alt="AI concept image" class="post-image">
+            <img src="{{ post.image_url }}" alt="AI concept image" class="post-image">
+
             <div class="post-content">
                 <p class="post-description"> {{ post.description}}</p>
                 <div class="post-body">
