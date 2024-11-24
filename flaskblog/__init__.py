@@ -21,7 +21,7 @@ bcrypt = Bcrypt(app)
 MAIL_SERVER = app.config['MAIL_SERVER'] = 'smtp.googlemail.com'
 MAIL_PORT = app.config['MAIL_PORT'] = 587
 MAIL_USERNAME = app.config['MAIL_USERNAME'] = 'williamsolaolu5@gmail.com'  # Use your actual Gmail address
-MAIL_PASSWORD = app.config['MAIL_PASSWORD'] = 'krqb rvcz diti hsam'     # Use your generated App Password
+MAIL_PASSWORD = app.config['MAIL_PASSWORD'] = 'kgggg'     # Use your generated App Password
 MAIL_USE_TLS = app.config['MAIL_USE_TLS'] = True
 MAIL_USE_SSL = app.config['MAIL_USE_SSL'] = False
 
