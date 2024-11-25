@@ -1,3 +1,4 @@
+import bleach
 from flask import render_template, redirect, url_for, request,flash,abort,jsonify
 from flaskblog import app,db
 from flask_login import login_user, login_required, logout_user,current_user
@@ -7,7 +8,6 @@ from datetime import datetime
 from .utils import notify_users_about_post,save_picture,send_reset_email,allowed_file
 
 
-# if individual post is been clicked 
 @app.route('/post/<int:post_id>', methods=['POST', 'GET'])
 def post_detail(post_id):
     post = Post.query.get_or_404(post_id)
@@ -15,16 +15,22 @@ def post_detail(post_id):
     user_comment = request.form.get('comment')
     if user_comment:
         if current_user.is_authenticated:
-            comment = Comment(user_id=current_user.id, post_id=post_id, content=user_comment)
+            # Sanitize the comment before saving
+            allowed_tags = ['b', 'i', 'u', 'p', 'strong', 'em', 'a']
+            allowed_attrs = {'a': ['href', 'title']}
+            sanitized_comment = bleach.clean(user_comment, tags=allowed_tags, attributes=allowed_attrs)
+            
+            comment = Comment(user_id=current_user.id, post_id=post_id, content=sanitized_comment)
             db.session.add(comment)
             db.session.commit()
             flash("Comment added successfully.", "success")
         else:
             flash('You need to be logged in to comment.', 'warning')
             return redirect(url_for('login'))
+    
     comments = Comment.query.filter_by(post_id=post.id).order_by(Comment.date_posted.desc()).all()
-    # print(post.content)
     return render_template('post-and-comments.html', post=post, comments=comments)
+
 @app.route('/search', methods=['GET'])
 def search():
     search_query = request.args.get('search')
